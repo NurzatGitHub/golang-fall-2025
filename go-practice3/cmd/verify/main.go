@@ -1,21 +1,31 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
-	"os"
+
+	_ "modernc.org/sqlite"
 )
 
 func main() {
-	dir := "internal/db/migrations"
-	entries, err := os.ReadDir(dir)
+	db, err := sql.Open("sqlite", "practice3.db")
 	if err != nil {
-		log.Fatalf("failed to read %s: %v", dir, err)
+		log.Fatalf(" failed to open database: %v", err)
 	}
-	fmt.Printf("Found %d migration files in %s:\n", len(entries), dir)
-	for _, e := range entries {
-		fmt.Println(" -", e.Name())
+	defer db.Close()
+
+	rows, err := db.Query("SELECT name FROM sqlite_master WHERE type='table'")
+	if err != nil {
+		log.Fatalf(" failed to query tables: %v", err)
 	}
-	fmt.Println("\nTo apply migrations run:")
-	fmt.Println(`migrate -path internal/db/migrations -database "sqlite3://./expense.db" up`)
+	defer rows.Close()
+
+	fmt.Println(" Connected successfully!")
+	fmt.Println("Tables in database:")
+	for rows.Next() {
+		var tableName string
+		rows.Scan(&tableName)
+		fmt.Println(" -", tableName)
+	}
 }
