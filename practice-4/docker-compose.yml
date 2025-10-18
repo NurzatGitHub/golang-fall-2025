@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:15
+    container_name: practice4_pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pguser
+      POSTGRES_PASSWORD: pgpass
+      POSTGRES_DB: practisedb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./users.sql:/docker-entrypoint-initdb.d/01_users.sql:ro  # <── добавил 01_ чтобы гарантировать порядок
+
+volumes:
+  pgdata:
